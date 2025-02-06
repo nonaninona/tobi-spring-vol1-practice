@@ -1,4 +1,4 @@
-package com.example;
+package com.example.v3;
 
 public class User {
     private String id;

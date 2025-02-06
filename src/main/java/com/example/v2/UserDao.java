@@ -1,7 +1,6 @@
-package com.example;
+package com.example.v2;
 
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,14 +8,31 @@ import java.sql.SQLException;
 
 public class UserDao {
 
-    private SimpleConnectionMaker simpleConnectionMaker;
+    public static void main(String[] args) throws ClassNotFoundException, SQLException  {
+        UserDao userDao = new UserDao();
 
-    public UserDao() {
-        this.simpleConnectionMaker = new SimpleConnectionMaker();
+        User user = new User();
+        user.setId("ihh0529");
+        user.setName("이현희");
+        user.setPassword("test");
+
+        userDao.add(user);
+        System.out.println(user.getId() + " 등록 성공");
+
+        User user2 = userDao.get(user.getId());
+        System.out.println(user2.getName());
+        System.out.println(user2.getPassword());
+        System.out.println(user2.getId() + " 조회 성공");
+    }
+
+    private Connection getConnection() throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection c = DriverManager.getConnection("jdbc:mysql://localhost/tobi", "root", "admin");
+        return c;
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
-        Connection c = simpleConnectionMaker.getConnection();
+        Connection c = getConnection();
 
         PreparedStatement ps = c.prepareStatement("insert into users(id, name, password) values (?, ?, ?)");
         ps.setString(1, user.getId());
@@ -30,7 +46,7 @@ public class UserDao {
     }
 
     public User get(String id) throws ClassNotFoundException, SQLException {
-        Connection c = simpleConnectionMaker.getConnection();
+        Connection c = getConnection();
 
         PreparedStatement ps = c.prepareStatement("select * from users where id = ?");
         ps.setString(1, id);

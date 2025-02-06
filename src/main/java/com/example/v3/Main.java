@@ -1,12 +1,11 @@
-package com.example;
+package com.example.v3;
 
 import java.sql.SQLException;
 
 public class Main {
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
-//        UserDao userDao = new NUserDao();
+        UserDao userDao = new NUserDao();
 //        UserDao userDao = new DUserDao();
-        UserDao userDao = new UserDao();
 
         User user = new User();
         user.setId("ihh0529");
