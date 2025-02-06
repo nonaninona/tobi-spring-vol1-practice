@@ -1,4 +1,4 @@
-package com.example.v4;
+package com.example.chapter1.v4;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

@@ -1,4 +1,4 @@
-package com.example.v3;
+package com.example.chapter1.v3;
 
 import java.sql.Connection;
 import java.sql.SQLException;

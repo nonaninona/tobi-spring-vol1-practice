@@ -1,4 +1,4 @@
-package com.example.v5;
+package com.example.chapter1.v5;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
