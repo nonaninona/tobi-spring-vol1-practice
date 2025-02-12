@@ -5,9 +5,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class userDaoGet extends UserDao {
+public class UserDaoDeleteAll extends UserDao {
     @Override
     public PreparedStatement makeStatement(Connection c) throws SQLException {
-        return c.prepareStatement("select * from users where id = ?");
+        return c.prepareStatement("delete from users");
     }
 }

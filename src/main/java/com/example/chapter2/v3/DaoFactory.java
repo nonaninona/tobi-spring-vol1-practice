@@ -1,5 +1,6 @@
 package com.example.chapter2.v3;
 
+import com.example.chapter2.v3.userDao.UserDaoAdd;
 import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +11,7 @@ public class DaoFactory {
 
     @Bean
     public UserDao userDao() {
-        UserDao userDao = new UserDao();
+        UserDao userDao = new UserDaoAdd();
         userDao.setDataSource(dataSource());
         return userDao;
     }

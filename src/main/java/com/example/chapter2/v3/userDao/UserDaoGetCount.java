@@ -5,9 +5,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class userDaoDeleteAll extends UserDao {
+public class UserDaoGetCount extends UserDao {
     @Override
     public PreparedStatement makeStatement(Connection c) throws SQLException {
-        return c.prepareStatement("delete from users");
+        return c.prepareStatement("select count(*) from users");
     }
 }
