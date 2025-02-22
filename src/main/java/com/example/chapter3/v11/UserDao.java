@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 
 public class UserDao {
 
@@ -15,21 +16,20 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException {
-        jdbcContext.executeSql("delete from users");
+//        jdbcTemplate.update(
+//                new PreparedStatementCreator() {
+//                    @Override
+//                    public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+//                        return con.prepareStatement("delete from users");
+//                    }
+//                }
+//        );
+        jdbcTemplate.update("delete from users");
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
-        StatementStrategy st = new StatementStrategy() {
-            @Override
-            public PreparedStatement makeStatement(Connection c) throws SQLException {
-                PreparedStatement ps = c.prepareStatement("insert into users(id, name, password) values (?, ?, ?)");
-                ps.setString(1, user.getId());
-                ps.setString(2, user.getName());
-                ps.setString(3, user.getPassword());
-                return ps;
-            }
-        };
-        jdbcContext.workWithStatementStrategy(st);
+        jdbcTemplate.update("insert into users(id, name, password) values (?, ?, ?)",
+                user.getId(), user.getName(), user.getPassword());
     }
 
 //    public User get(String id) throws ClassNotFoundException, SQLException {

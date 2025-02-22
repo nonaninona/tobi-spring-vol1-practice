@@ -15,8 +15,10 @@ public class UserDaoTest {
         user.setPassword("test");
 
         userDao1.add(user);
-
         System.out.println(user.getId() + " 등록 성공");
+
+        userDao1.deleteAll();
+        System.out.println(user.getId() + " 제거 성공");
 
 //        User user2 = userDao1.get(user.getId());
 //        System.out.println(user2.getName());
