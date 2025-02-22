@@ -24,11 +24,11 @@ public class Calculator {
         }
     }
 
-    private int lineReadTemplate(String filePath, LineCallBack callBack, int initVal) throws IOException {
+    private <T> T lineReadTemplate(String filePath, LineCallBack<T> callBack, T initVal) throws IOException {
         BufferedReader br = null;
         try {
             br = new BufferedReader(new FileReader(filePath));
-            int total = initVal;
+            T total = initVal;
             String line = null;
             while ((line = br.readLine()) != null) {
                 total = callBack.doSomethingWithLine(line, total);
@@ -49,7 +49,7 @@ public class Calculator {
     }
 
     public int calcSum(String filePath) throws IOException {
-        LineCallBack sumCallBack = new LineCallBack() {
+        LineCallBack<Integer> sumCallBack = new LineCallBack<Integer>() {
             @Override
             public Integer doSomethingWithLine(String line, Integer value) {
                 return Integer.parseInt(line) + value;
@@ -59,12 +59,22 @@ public class Calculator {
     }
 
     public int calcMul(String filePath) throws IOException {
-        LineCallBack mulCallBack = new LineCallBack() {
+        LineCallBack<Integer> mulCallBack = new LineCallBack<Integer>() {
             @Override
             public Integer doSomethingWithLine(String line, Integer value) {
                 return Integer.parseInt(line) * value;
             }
         };
         return lineReadTemplate(filePath, mulCallBack, 1);
+    }
+
+    public String concentrate(String filePath) throws IOException {
+        LineCallBack<String> sumCallBack = new LineCallBack<String>() {
+            @Override
+            public String doSomethingWithLine(String line, String value) {
+                return value + line;
+            }
+        };
+        return lineReadTemplate(filePath, sumCallBack, "");
     }
 }
