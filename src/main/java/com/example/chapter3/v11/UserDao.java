@@ -2,10 +2,14 @@ package com.example.chapter3.v11;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 
 public class UserDao {
 
@@ -32,68 +36,29 @@ public class UserDao {
                 user.getId(), user.getName(), user.getPassword());
     }
 
-//    public User get(String id) throws ClassNotFoundException, SQLException {
-//        Connection c = dataSource.getConnection();;
-//
-//        PreparedStatement ps = strategy.makeStatement(c);
-//        ps.setString(1, id);
-//
-//        ResultSet rs = ps.executeQuery();
-//        rs.next();
-//
-//        User user = new User();
-//        user.setId(rs.getString("id"));
-//        user.setName(rs.getString("name"));
-//        user.setPassword(rs.getString("password"));
-//
-//        rs.close();
-//        ps.close();
-//        c.close();
-//
-//        return user;
-//    }
+    public int getCount() throws SQLException {
+//        return jdbcTemplate.query("select count(*) from users", new ResultSetExtractor<Integer>() {
+//            @Override
+//            public Integer extractData(ResultSet rs) throws SQLException, DataAccessException {
+//                rs.next();
+//                return rs.getInt(1);
+//            }
+//        });
+        return jdbcTemplate.queryForObject("select count(*) from users", Integer.class);
+    }
 
-
-//    public int getCount() throws SQLException {
-//        Connection c = null;
-//        PreparedStatement ps = null;
-//        ResultSet rs = null;
-//
-//
-//        try {
-//            c = dataSource.getConnection();
-//
-//            ps = strategy.makeStatement(c);
-//
-//            rs = ps.executeQuery();
-//            rs.next();
-//            return rs.getInt(1);
-//        } catch (SQLException e) {
-//            throw e;
-//        } finally {
-//            if (rs != null) {
-//                try {
-//                    rs.close();
-//                } catch (SQLException e) {
-//
-//                }
-//            }
-//
-//            if (ps != null) {
-//                try {
-//                    ps.close();
-//                } catch (SQLException e) {
-//
-//                }
-//            }
-//
-//            if (c != null) {
-//                try {
-//                    c.close();
-//                } catch (SQLException e) {
-//
-//                }
-//            }
-//        }
-//    }
+    public User get(String id) throws ClassNotFoundException, SQLException {
+        return jdbcTemplate.queryForObject("select id, name, password where id = ?",
+                new Object[] {id},
+                new RowMapper<User>() {
+                    @Override
+                    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        User user = new User();
+                        user.setId(rs.getString("id"));
+                        user.setName(rs.getString("name"));
+                        user.setPassword(rs.getString("password"));
+                        return user;
+                    }
+                });
+    }
 }
