@@ -1,5 +1,6 @@
 package com.example.chapter3.v4;
 
+import com.example.chapter3.v4.statementStrategy.DeleteAllStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +15,39 @@ public class UserDao {
     public UserDao(DataSource dataSource, StatementStrategy strategy) {
         this.dataSource = dataSource;
         this.strategy = strategy;
+    }
+
+    public void jdbcContextWithStatementStrategy(StatementStrategy stat) throws SQLException {
+        Connection c = null;
+        PreparedStatement ps = null;
+
+        try {
+            c = dataSource.getConnection();
+            ps = strategy.makeStatement(c);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e){
+                    throw e;
+                }
+            }
+            if (c != null) {
+                try {
+                    c.close();
+                } catch (SQLException e){
+                    throw e;
+                }
+            }
+        }
+    }
+
+    public void deleteAll() throws SQLException {
+        StatementStrategy st = new DeleteAllStatement();
+        jdbcContextWithStatementStrategy(st);
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
@@ -49,35 +83,6 @@ public class UserDao {
         c.close();
 
         return user;
-    }
-
-    public void deleteAll() throws SQLException {
-        Connection c = null;
-        PreparedStatement ps = null;
-
-        try {
-            c = dataSource.getConnection();
-            ps = strategy.makeStatement(c);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            if (ps != null) {
-               try {
-                   ps.close();
-               } catch (SQLException e) {
-
-               }
-            }
-
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-
-                }
-            }
-        }
     }
 
     private static PreparedStatement makeStatement(Connection c) throws SQLException {
