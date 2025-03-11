@@ -23,8 +23,10 @@ public class UserDaoJdbc implements UserDao {
     @Override
     public void add(User user) {
 //        try {
-            jdbcTemplate.update("insert into users(id, name, password, level, login_count, recommended_count) values (?, ?, ?, ?, ?, ?)",
-                    user.getId(), user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLoginCount(), user.getRecommendedCount());
+        jdbcTemplate.update(
+                "insert into users(id, name, password, level, login_count, recommended_count) values (?, ?, ?, ?, ?, ?)",
+                user.getId(), user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLoginCount(),
+                user.getRecommendedCount());
 //        } catch (DuplicateKeyException e) {
 //            throw new DuplicateUserIdException(e);
 //        }
@@ -37,14 +39,17 @@ public class UserDaoJdbc implements UserDao {
 
     @Override
     public int update(User user) {
-        return jdbcTemplate.update("update users set name = ?, password = ?, level = ?, login_count = ?, recommended_count = ? where id = ?",
-                user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLoginCount(), user.getRecommendedCount(), user.getId());
+        return jdbcTemplate.update(
+                "update users set name = ?, password = ?, level = ?, login_count = ?, recommended_count = ? where id = ?",
+                user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLoginCount(),
+                user.getRecommendedCount(), user.getId());
     }
 
     @Override
     public User get(String id) {
-        return jdbcTemplate.queryForObject("select id, name, password, level, login_count, recommended_count from users where id = ?",
-                new Object[] {id},
+        return jdbcTemplate.queryForObject(
+                "select id, name, password, level, login_count, recommended_count from users where id = ?",
+                new Object[]{id},
                 new RowMapper<User>() {
                     @Override
                     public User mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -62,6 +67,20 @@ public class UserDaoJdbc implements UserDao {
 
     @Override
     public List<User> getAll() {
-        return List.of();
+        return jdbcTemplate.query("select * from users",
+                new RowMapper<User>() {
+                    @Override
+                    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        User user = new User();
+                        user.setId(rs.getString("id"));
+                        user.setName(rs.getString("name"));
+                        user.setPassword(rs.getString("password"));
+                        user.setLevel(Level.valueOf(rs.getInt("level")));
+                        user.setLoginCount(rs.getInt("login_count"));
+                        user.setRecommendedCount(rs.getInt("recommended_count"));
+                        return user;
+                    }
+                }
+        );
     }
 }

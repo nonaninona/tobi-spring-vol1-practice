@@ -9,6 +9,12 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 public class DaoFactory {
 
     @Bean
+    public UserService userService() {
+        UserService userService = new UserService(userDao());
+        return userService;
+    }
+
+    @Bean
     public UserDao userDao() {
         UserDaoJdbc userDaoJdbc = new UserDaoJdbc(dataSource());
         return userDaoJdbc;
