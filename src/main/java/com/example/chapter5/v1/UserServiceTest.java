@@ -1,7 +1,7 @@
 package com.example.chapter5.v1;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.not;
+import static com.example.chapter5.v1.UserService.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +24,10 @@ public class UserServiceTest {
         userDao = ac.getBean("userDao", UserDao.class);
         userDao.deleteAll();
 
-        users.add(new User("userA", "유저A", "passwordA", Level.BASIC, 49, 0));
-        users.add(new User("userB", "유저B", "passwordB", Level.BASIC, 50, 0));
-        users.add(new User("userC", "유저C", "passwordC", Level.SILVER, 60, 29));
-        users.add(new User("userD", "유저D", "passwordD", Level.SILVER, 60, 30));
+        users.add(new User("userA", "유저A", "passwordA", Level.BASIC, MIN_LOGIN_COUNT_FOR_SILVER-1, 0));
+        users.add(new User("userB", "유저B", "passwordB", Level.BASIC, MIN_LOGIN_COUNT_FOR_SILVER, 0));
+        users.add(new User("userC", "유저C", "passwordC", Level.SILVER, 60, MIN_RECOMMENED_COUNT_FOR_GOLD-1));
+        users.add(new User("userD", "유저D", "passwordD", Level.SILVER, 60, MIN_RECOMMENED_COUNT_FOR_GOLD));
         users.add(new User("userE", "유저E", "passwordE", Level.GOLD,  100, 100));
     }
 
@@ -41,16 +41,11 @@ public class UserServiceTest {
         userService.upgradeLevels();
 
         // then
-        checkLevel(users.get(0), Level.BASIC);
-        checkLevel(users.get(1), Level.SILVER);
-        checkLevel(users.get(2), Level.SILVER);
-        checkLevel(users.get(3), Level.GOLD);
-        checkLevel(users.get(4), Level.GOLD);
-    }
-
-    private void checkLevel(User user, Level level) {
-        User findUser = userDao.get(user.getId());
-        assertThat(findUser.getLevel()).isEqualByComparingTo(level);
+        checkLevelUpgraded(users.get(0), false);
+        checkLevelUpgraded(users.get(1), true);
+        checkLevelUpgraded(users.get(2), false);
+        checkLevelUpgraded(users.get(3), true);
+        checkLevelUpgraded(users.get(4), false);
     }
 
     @Test
@@ -71,6 +66,20 @@ public class UserServiceTest {
         // then
         checkLevel(findNotInitialUser, notInitialUser.getLevel());
         checkLevel(findInitialUser, Level.BASIC);
+    }
+
+    private void checkLevel(User user, Level level) {
+        User findUser = userDao.get(user.getId());
+        assertThat(findUser.getLevel()).isEqualByComparingTo(level);
+    }
+
+    private void checkLevelUpgraded(User user, boolean isUpgrad) {
+        User findUser = userDao.get(user.getId());
+        if(isUpgrad) {
+            assertThat(findUser.getLevel()).isEqualTo(user.getLevel().nextLevel());
+        } else {
+            assertThat(findUser.getLevel()).isEqualTo(user.getLevel());
+        }
     }
 
 }
