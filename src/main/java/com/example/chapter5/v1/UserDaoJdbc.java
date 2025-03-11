@@ -15,10 +15,12 @@ public class UserDaoJdbc implements UserDao {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+    @Override
     public void deleteAll() {
         jdbcTemplate.update("delete from users");
     }
 
+    @Override
     public void add(User user) {
 //        try {
             jdbcTemplate.update("insert into users(id, name, password, level, login_count, recommended_count) values (?, ?, ?, ?, ?, ?)",
@@ -28,10 +30,18 @@ public class UserDaoJdbc implements UserDao {
 //        }
     }
 
+    @Override
     public int getCount() {
         return jdbcTemplate.queryForObject("select count(*) from users", Integer.class);
     }
 
+    @Override
+    public int update(User user) {
+        return jdbcTemplate.update("update users set name = ?, password = ?, level = ?, login_count = ?, recommended_count = ? where id = ?",
+                user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLoginCount(), user.getRecommendedCount(), user.getId());
+    }
+
+    @Override
     public User get(String id) {
         return jdbcTemplate.queryForObject("select id, name, password, level, login_count, recommended_count from users where id = ?",
                 new Object[] {id},

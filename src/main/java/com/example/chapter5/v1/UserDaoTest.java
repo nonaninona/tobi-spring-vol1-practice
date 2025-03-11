@@ -30,12 +30,12 @@ public class UserDaoTest {
         this.user1 = new User("userA", "유저A", "passwordA", Level.BASIC, 1, 0);
         this.user2 = new User("userB", "유저B", "passwordB", Level.SILVER, 55, 10);
         this.user3 = new User("userC", "유저C", "passwordC", Level.GOLD, 100, 40);
+
+        userDao.deleteAll();
     }
 
     @Test
     void addAndGet() {
-        userDao.deleteAll();
-
         userDao.add(user1);
         User findUser1 = userDao.get(user1.getId());
         checkSameUser(user1, findUser1);
@@ -47,8 +47,6 @@ public class UserDaoTest {
 
     @Test
     void duplicateKey() {
-        userDao.deleteAll();
-
         User user = new User();
         user.setId("ihh0529");
         user.setName("이현희");
@@ -64,8 +62,6 @@ public class UserDaoTest {
 
     @Test
     void duplicateKeyTranslate() {
-        userDao.deleteAll();
-
         User user = new User();
         user.setId("ihh0529");
         user.setName("이현희");
@@ -83,6 +79,29 @@ public class UserDaoTest {
             assertThat(translator.translate(null, null, sqlException))
                     .isInstanceOf(DuplicateKeyException.class);
         }
+    }
+
+    @Test
+    void update() {
+        //given
+        userDao.add(user1);
+        userDao.add(user2);
+
+        //when
+        user1.setName("userD");
+        user1.setPassword("passwordD");
+        user1.setLevel(Level.SILVER);
+        user1.setLoginCount(0);
+        user1.setRecommendedCount(0);
+        int updateCount = userDao.update(user1);
+
+        User findUser1 = userDao.get(user1.getId());
+        User findUser2 = userDao.get(user2.getId());
+
+        //then
+        checkSameUser(user1, findUser1);
+        checkSameUser(user2, findUser2);
+        assertThat(updateCount).isEqualTo(1);
     }
 
     private void checkSameUser(User user1, User user2) {
