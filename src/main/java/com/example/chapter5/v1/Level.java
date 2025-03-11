@@ -1,14 +1,12 @@
 package com.example.chapter5.v1;
 
 public enum Level {
-    GOLD(3, null), SILVER(2, GOLD), BASIC(1, SILVER);
+    GOLD(3), SILVER(2), BASIC(1);
 
     private final int value;
-    private final Level next;
 
-    Level(int value, Level next) {
+    Level(int value) {
         this.value = value;
-        this.next = next;
     }
 
     public int intValue() {
@@ -16,7 +14,11 @@ public enum Level {
     }
 
     public Level nextLevel() {
-        return next;
+        return switch (this) {
+            case BASIC -> SILVER;
+            case SILVER -> GOLD;
+            case GOLD -> null;
+        };
     }
 
     public static Level valueOf(int value) {

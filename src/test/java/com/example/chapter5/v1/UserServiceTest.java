@@ -1,20 +1,31 @@
 package com.example.chapter5.v1;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static com.example.chapter5.v1.UserService.*;
+import static com.example.chapter5.v1.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy.*;
 
+import com.example.chapter5.v1.DaoFactory;
+import com.example.chapter5.v1.Level;
+import com.example.chapter5.v1.User;
+import com.example.chapter5.v1.UserDao;
+import com.example.chapter5.v1.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+@SpringBootTest
 public class UserServiceTest {
 
+    @Autowired
     private UserService userService;
+    @Autowired
     private UserDao userDao;
+
     private List<User> users = new ArrayList<>();
 
     @BeforeEach

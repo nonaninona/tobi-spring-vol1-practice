@@ -1,5 +1,7 @@
 package com.example.chapter5.v1;
 
+import static com.example.chapter5.v1.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy.MIN_LOGIN_COUNT_FOR_SILVER;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -50,37 +52,29 @@ public class UserDaoJdbc implements UserDao {
         return jdbcTemplate.queryForObject(
                 "select id, name, password, level, login_count, recommended_count from users where id = ?",
                 new Object[]{id},
-                new RowMapper<User>() {
-                    @Override
-                    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        User user = new User();
-                        user.setId(rs.getString("id"));
-                        user.setName(rs.getString("name"));
-                        user.setPassword(rs.getString("password"));
-                        user.setLevel(Level.valueOf(rs.getInt("level")));
-                        user.setLoginCount(rs.getInt("login_count"));
-                        user.setRecommendedCount(rs.getInt("recommended_count"));
-                        return user;
-                    }
-                });
+                getRowMapper());
     }
 
     @Override
     public List<User> getAll() {
         return jdbcTemplate.query("select * from users",
-                new RowMapper<User>() {
-                    @Override
-                    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        User user = new User();
-                        user.setId(rs.getString("id"));
-                        user.setName(rs.getString("name"));
-                        user.setPassword(rs.getString("password"));
-                        user.setLevel(Level.valueOf(rs.getInt("level")));
-                        user.setLoginCount(rs.getInt("login_count"));
-                        user.setRecommendedCount(rs.getInt("recommended_count"));
-                        return user;
-                    }
-                }
+                getRowMapper()
         );
+    }
+
+    private static RowMapper<User> getRowMapper() {
+        return new RowMapper<User>() {
+            @Override
+            public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+                User user = new User();
+                user.setId(rs.getString("id"));
+                user.setName(rs.getString("name"));
+                user.setPassword(rs.getString("password"));
+                user.setLevel(Level.valueOf(rs.getInt("level")));
+                user.setLoginCount(rs.getInt("login_count"));
+                user.setRecommendedCount(rs.getInt("recommended_count"));
+                return user;
+            }
+        };
     }
 }

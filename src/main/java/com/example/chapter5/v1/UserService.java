@@ -1,14 +1,13 @@
 package com.example.chapter5.v1;
 
+import com.example.chapter5.v1.upgradeLevelPolicy.UserLevelUpgradePolicy;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class UserService {
-    public static final int MIN_LOGIN_COUNT_FOR_SILVER = 50;
-    public static final int MIN_RECOMMENED_COUNT_FOR_GOLD = 30;
-
     private final UserDao userDao;
+    private final UserLevelUpgradePolicy levelUpgradePolicy;
 
     public void upgradeLevels() {
         List<User> allUsers = userDao.getAll();
@@ -21,21 +20,12 @@ public class UserService {
     }
 
     private void upgradeLevel(User user) {
-        user.upgradeLevel();
+        levelUpgradePolicy.upgradeLevel(user);
         userDao.update(user);
     }
 
     private boolean canUpgradeLevel(User user) {
-        switch (user.getLevel()) {
-            case BASIC:
-                return (user.getLoginCount() >= MIN_LOGIN_COUNT_FOR_SILVER);
-            case SILVER:
-                return (user.getRecommendedCount() >= MIN_RECOMMENED_COUNT_FOR_GOLD);
-            case GOLD:
-                return false;
-            default:
-                throw new IllegalArgumentException("Unknown Level : " + user.getLevel());
-        }
+        return levelUpgradePolicy.canUpgradeLevel(user);
     }
 
     public void add(User user) {

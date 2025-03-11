@@ -2,19 +2,29 @@ package com.example.chapter5.v1;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.chapter5.v1.DaoFactory;
+import com.example.chapter5.v1.Level;
+import com.example.chapter5.v1.User;
+import com.example.chapter5.v1.UserDao;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
+@SpringBootApplication
 public class UserDaoTest {
+    @Autowired
     private UserDao userDao;
+    @Autowired
     private DataSource dataSource;
 
     private User user1;
@@ -23,9 +33,9 @@ public class UserDaoTest {
 
     @BeforeEach
     void setup() {
-        ApplicationContext ac = new AnnotationConfigApplicationContext(DaoFactory.class);
-        userDao = ac.getBean(UserDao.class);
-        dataSource = ac.getBean(DataSource.class);
+//        ApplicationContext ac = new AnnotationConfigApplicationContext(DaoFactory.class);
+//        userDao = ac.getBean(UserDao.class);
+//        dataSource = ac.getBean(DataSource.class);
 
         this.user1 = new User("userA", "유저A", "passwordA", Level.BASIC, 1, 0);
         this.user2 = new User("userB", "유저B", "passwordB", Level.SILVER, 55, 10);
