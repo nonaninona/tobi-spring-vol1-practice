@@ -13,7 +13,7 @@ public class DaoFactory {
 
     @Bean
     public UserService userService() {
-        UserService userService = new UserService(userDao(), userLevelUpgradePolicy());
+        UserService userService = new UserService(userDao(), userLevelUpgradePolicy(), dataSource());
         return userService;
     }
 

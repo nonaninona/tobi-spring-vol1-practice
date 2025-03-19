@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,8 @@ public class UserServiceTest {
     private UserDao userDao;
     @Autowired
     private UserLevelUpgradePolicy userLevelUpgradePolicy;
+    @Autowired
+    private DataSource dataSource;
 
     private List<User> users = new ArrayList<>();
 
@@ -45,7 +48,7 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("유저 업그레이드 테스트")
-    void testUserLevelUpgrade() {
+    void testUserLevelUpgrade() throws Exception {
         // given
         users.forEach(user -> userDao.add(user));
 
@@ -101,7 +104,7 @@ public class UserServiceTest {
     void testNetworkFail() {
         // given
         users.forEach(user -> userDao.add(user));
-        UserService testUserService = new TestUserService(userDao, userLevelUpgradePolicy, users.get(3).getId());
+        UserService testUserService = new TestUserService(userDao, userLevelUpgradePolicy, dataSource, users.get(3).getId());
 
         // when
 
@@ -116,8 +119,8 @@ public class UserServiceTest {
 
         private String id;
 
-        public TestUserService(UserDao userDao, UserLevelUpgradePolicy levelUpgradePolicy, String id) {
-            super(userDao, levelUpgradePolicy);
+        public TestUserService(UserDao userDao, UserLevelUpgradePolicy levelUpgradePolicy, DataSource dataSource, String id) {
+            super(userDao, levelUpgradePolicy, dataSource);
             this.id = id;
         }
 
