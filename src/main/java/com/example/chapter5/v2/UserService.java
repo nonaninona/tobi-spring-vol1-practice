@@ -2,7 +2,11 @@ package com.example.chapter5.v2;
 
 import com.example.chapter5.v2.upgradeLevelPolicy.UserLevelUpgradePolicy;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.sql.DataSource;
@@ -14,11 +18,10 @@ import java.util.List;
 public class UserService {
     private final UserDao userDao;
     private final UserLevelUpgradePolicy levelUpgradePolicy;
-    private final DataSource datasource;
+    private final PlatformTransactionManager platformTransactionManager;
 
-    public void upgradeLevels() throws Exception {
-        TransactionSynchronizationManager.initSynchronization();
-        Connection c = DataSourceUtils.getConnection(datasource);
+    public void upgradeLevels() {
+        TransactionStatus status = platformTransactionManager.getTransaction(new DefaultTransactionDefinition());
 
         try {
             List<User> allUsers = userDao.getAll();
@@ -28,14 +31,10 @@ public class UserService {
                     upgradeLevel(user);
                 }
             }
-            c.commit();
-        } catch (SQLException e) {
-            c.rollback();
+            platformTransactionManager.commit(status);
+        } catch (RuntimeException e) {
+            platformTransactionManager.rollback(status);
             throw e;
-        } finally {
-            DataSourceUtils.releaseConnection(c, datasource);
-            TransactionSynchronizationManager.unbindResource(datasource);
-            TransactionSynchronizationManager.clearSynchronization();
         }
     }
 

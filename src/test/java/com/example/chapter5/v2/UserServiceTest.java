@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class UserServiceTest {
     @Autowired
     private UserLevelUpgradePolicy userLevelUpgradePolicy;
     @Autowired
-    private DataSource dataSource;
+    private PlatformTransactionManager platformTransactionManager;
 
     private List<User> users = new ArrayList<>();
 
@@ -104,7 +105,7 @@ public class UserServiceTest {
     void testNetworkFail() {
         // given
         users.forEach(user -> userDao.add(user));
-        UserService testUserService = new TestUserService(userDao, userLevelUpgradePolicy, dataSource, users.get(3).getId());
+        UserService testUserService = new TestUserService(userDao, userLevelUpgradePolicy, platformTransactionManager, users.get(3).getId());
 
         // when
 
@@ -119,8 +120,8 @@ public class UserServiceTest {
 
         private String id;
 
-        public TestUserService(UserDao userDao, UserLevelUpgradePolicy levelUpgradePolicy, DataSource dataSource, String id) {
-            super(userDao, levelUpgradePolicy, dataSource);
+        public TestUserService(UserDao userDao, UserLevelUpgradePolicy levelUpgradePolicy, PlatformTransactionManager platformTransactionManager, String id) {
+            super(userDao, levelUpgradePolicy, platformTransactionManager);
             this.id = id;
         }
 
