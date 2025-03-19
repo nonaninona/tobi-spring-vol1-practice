@@ -1,6 +1,6 @@
 package com.example.chapter5.v2;
 
-import com.example.chapter5.v1.*;
+import com.example.chapter5.v2.upgradeLevelPolicy.UserLevelUpgradePolicy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,17 +12,20 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.chapter5.v1.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy.MIN_LOGIN_COUNT_FOR_SILVER;
-import static com.example.chapter5.v1.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy.MIN_RECOMMENED_COUNT_FOR_GOLD;
+import static com.example.chapter5.v2.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy.MIN_LOGIN_COUNT_FOR_SILVER;
+import static com.example.chapter5.v2.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy.MIN_RECOMMENED_COUNT_FOR_GOLD;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
+@SpringBootTest(classes = DaoFactory.class)
 public class UserServiceTest {
 
     @Autowired
     private UserService userService;
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private UserLevelUpgradePolicy userLevelUpgradePolicy;
 
     private List<User> users = new ArrayList<>();
 
@@ -91,4 +94,45 @@ public class UserServiceTest {
         }
     }
 
+
+
+    @Test
+    @DisplayName("강제 예외 발생")
+    void testNetworkFail() {
+        // given
+        users.forEach(user -> userDao.add(user));
+        UserService testUserService = new TestUserService(userDao, userLevelUpgradePolicy, users.get(3).getId());
+
+        // when
+
+        // then
+        assertThrows(TestUserServiceException.class, () -> testUserService.upgradeLevels());
+        assertThat(users.get(1).getLevel()).isEqualTo(Level.BASIC);
+    }
+
+
+
+    private static class TestUserService extends UserService {
+
+        private String id;
+
+        public TestUserService(UserDao userDao, UserLevelUpgradePolicy levelUpgradePolicy, String id) {
+            super(userDao, levelUpgradePolicy);
+            this.id = id;
+        }
+
+        @Override
+        protected void upgradeLevel(User user) {
+            if(user.getId().equals(this.id)) {
+                throw new TestUserServiceException();
+            }
+            super.upgradeLevel(user);
+        }
+
+    }
+
+    private static class TestUserServiceException extends RuntimeException {
+        public TestUserServiceException() {
+        }
+    }
 }

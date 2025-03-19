@@ -20,7 +20,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
-@SpringBootApplication
+@SpringBootTest(classes = TestConfig.class)
 public class UserDaoTest {
     @Autowired
     private UserDao userDao;

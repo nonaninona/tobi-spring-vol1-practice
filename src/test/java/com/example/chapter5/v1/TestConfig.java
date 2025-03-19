@@ -1,8 +1,5 @@
 package com.example.chapter5.v1;
 
-import com.example.chapter5.v1.UserDao;
-import com.example.chapter5.v1.UserDaoJdbc;
-import com.example.chapter5.v1.UserService;
 import com.example.chapter5.v1.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy;
 import com.example.chapter5.v1.upgradeLevelPolicy.UserLevelUpgradePolicy;
 import javax.sql.DataSource;

@@ -1,13 +1,10 @@
 package com.example.chapter5.v2;
 
-import com.example.chapter5.v1.Level;
-import com.example.chapter5.v1.User;
-import com.example.chapter5.v1.UserDao;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
@@ -17,7 +14,7 @@ import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootApplication
+@SpringBootTest(classes = DaoFactory.class)
 public class UserDaoTest {
     @Autowired
     private UserDao userDao;

@@ -3,11 +3,6 @@ package com.example.chapter5.v1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static com.example.chapter5.v1.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy.*;
 
-import com.example.chapter5.v1.DaoFactory;
-import com.example.chapter5.v1.Level;
-import com.example.chapter5.v1.User;
-import com.example.chapter5.v1.UserDao;
-import com.example.chapter5.v1.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-@SpringBootTest
+@SpringBootTest(classes = TestConfig.class)
 public class UserServiceTest {
 
     @Autowired
