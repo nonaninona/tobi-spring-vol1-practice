@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.mail.MailSender;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
@@ -31,6 +32,8 @@ public class UserServiceTest {
     private PlatformTransactionManager platformTransactionManager;
 
     private List<User> users = new ArrayList<>();
+    @Autowired
+    private MailSender mailSender;
 
     @BeforeEach
     void setup() {
@@ -39,11 +42,11 @@ public class UserServiceTest {
         userDao = ac.getBean("userDao", UserDao.class);
         userDao.deleteAll();
 
-        users.add(new User("userA", "유저A", "passwordA", "emailA", Level.BASIC, MIN_LOGIN_COUNT_FOR_SILVER-1, 0));
-        users.add(new User("userB", "유저B", "passwordB", "emailB", Level.BASIC, MIN_LOGIN_COUNT_FOR_SILVER, 0));
-        users.add(new User("userC", "유저C", "passwordC", "emailC", Level.SILVER, 60, MIN_RECOMMENED_COUNT_FOR_GOLD-1));
-        users.add(new User("userD", "유저D", "passwordD", "emailD", Level.SILVER, 60, MIN_RECOMMENED_COUNT_FOR_GOLD));
-        users.add(new User("userE", "유저E", "passwordE", "emailE", Level.GOLD,  100, 100));
+        users.add(new User("userA", "유저A", "passwordA", "emailA@gmail.com", Level.BASIC, MIN_LOGIN_COUNT_FOR_SILVER-1, 0));
+        users.add(new User("userB", "유저B", "passwordB", "emailB@gmail.com", Level.BASIC, MIN_LOGIN_COUNT_FOR_SILVER, 0));
+        users.add(new User("userC", "유저C", "passwordC", "emailC@gmail.com", Level.SILVER, 60, MIN_RECOMMENED_COUNT_FOR_GOLD-1));
+        users.add(new User("userD", "유저D", "passwordD", "emailD@gmail.com", Level.SILVER, 60, MIN_RECOMMENED_COUNT_FOR_GOLD));
+        users.add(new User("userE", "유저E", "passwordE", "emailE@gmail.com", Level.GOLD,  100, 100));
     }
 
     @Test
@@ -104,7 +107,7 @@ public class UserServiceTest {
     void testNetworkFail() {
         // given
         users.forEach(user -> userDao.add(user));
-        UserService testUserService = new TestUserService(userDao, userLevelUpgradePolicy, platformTransactionManager, users.get(3).getId());
+        UserService testUserService = new TestUserService(userDao, userLevelUpgradePolicy, platformTransactionManager, mailSender, users.get(3).getId());
 
         // when
 
@@ -119,8 +122,8 @@ public class UserServiceTest {
 
         private String id;
 
-        public TestUserService(UserDao userDao, UserLevelUpgradePolicy levelUpgradePolicy, PlatformTransactionManager platformTransactionManager, String id) {
-            super(userDao, levelUpgradePolicy, platformTransactionManager);
+        public TestUserService(UserDao userDao, UserLevelUpgradePolicy levelUpgradePolicy, PlatformTransactionManager platformTransactionManager, MailSender mailSender, String id) {
+            super(userDao, levelUpgradePolicy, platformTransactionManager, mailSender);
             this.id = id;
         }
 

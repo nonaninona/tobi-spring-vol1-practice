@@ -7,19 +7,45 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
 
 @Configuration
-@PropertySource({ "classpath:chapter5/application.yml" })
+@PropertySource({"classpath:chapter5/application.properties"})
 public class DaoFactory {
 
     @Bean
     public UserService userService() {
-        UserService userService = new UserService(userDao(), userLevelUpgradePolicy(), platformTransactionManager());
+        UserService userService = new UserService(
+                userDao(),
+                userLevelUpgradePolicy(),
+                platformTransactionManager(),
+                mailSender()
+        );
         return userService;
+    }
+
+    @Bean
+    public MailSender mailSender() {
+        MailSender mailSender = myMailSenderFactory().createMyMailSender();
+        return mailSender;
+    }
+
+    @Bean
+    public MyMailSenderFactory myMailSenderFactory() {
+        MyMailSenderFactory myMailSenderFactory = new MyMailSenderFactory(emailProperties());
+        return myMailSenderFactory;
+    }
+
+    @Bean
+    public EmailProperties emailProperties() {
+        EmailProperties emailProperties = new EmailProperties();
+        return emailProperties;
     }
 
     @Bean

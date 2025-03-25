@@ -25,8 +25,8 @@ public class UserDaoJdbc implements UserDao {
     public void add(User user) {
 //        try {
         jdbcTemplate.update(
-                "insert into users(id, name, password, level, login_count, recommended_count) values (?, ?, ?, ?, ?, ?)",
-                user.getId(), user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLoginCount(),
+                "insert into users(id, name, password, email, level, login_count, recommended_count) values (?, ?, ?, ?, ?, ?, ?)",
+                user.getId(), user.getName(), user.getPassword(), user.getEmail(), user.getLevel().intValue(), user.getLoginCount(),
                 user.getRecommendedCount());
 //        } catch (DuplicateKeyException e) {
 //            throw new DuplicateUserIdException(e);
@@ -41,15 +41,15 @@ public class UserDaoJdbc implements UserDao {
     @Override
     public int update(User user) {
         return jdbcTemplate.update(
-                "update users set name = ?, password = ?, level = ?, login_count = ?, recommended_count = ? where id = ?",
-                user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLoginCount(),
+                "update users set name = ?, password = ?, email = ?, level = ?, login_count = ?, recommended_count = ? where id = ?",
+                user.getName(), user.getPassword(), user.getEmail(), user.getLevel().intValue(), user.getLoginCount(),
                 user.getRecommendedCount(), user.getId());
     }
 
     @Override
     public User get(String id) {
         return jdbcTemplate.queryForObject(
-                "select id, name, password, level, login_count, recommended_count from users where id = ?",
+                "select id, name, password, email, level, login_count, recommended_count from users where id = ?",
                 new Object[]{id},
                 getRowMapper());
     }
@@ -69,6 +69,7 @@ public class UserDaoJdbc implements UserDao {
                 user.setId(rs.getString("id"));
                 user.setName(rs.getString("name"));
                 user.setPassword(rs.getString("password"));
+                user.setEmail(rs.getString("email"));
                 user.setLevel(Level.valueOf(rs.getInt("level")));
                 user.setLoginCount(rs.getInt("login_count"));
                 user.setRecommendedCount(rs.getInt("recommended_count"));

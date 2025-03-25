@@ -22,7 +22,7 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok:1.18.36'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
 
-    implementation "javax.mail:mail:1.4.7"
+    implementation "org.springframework.boot:spring-boot-starter-mail:3.4.4"
 }
 
 test {
