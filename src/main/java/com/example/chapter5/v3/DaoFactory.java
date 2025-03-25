@@ -32,7 +32,8 @@ public class DaoFactory {
 
     @Bean
     public MailSender mailSender() {
-        MailSender mailSender = myMailSenderFactory().createMyMailSender();
+//        MailSender mailSender = myMailSenderFactory().createMyMailSender();
+        DummyMailSender mailSender = new DummyMailSender();
         return mailSender;
     }
 
