@@ -31,9 +31,9 @@ public class UserDaoTest {
 //        userDao = ac.getBean(UserDao.class);
 //        dataSource = ac.getBean(DataSource.class);
 
-        this.user1 = new User("userA", "유저A", "passwordA", Level.BASIC, 1, 0);
-        this.user2 = new User("userB", "유저B", "passwordB", Level.SILVER, 55, 10);
-        this.user3 = new User("userC", "유저C", "passwordC", Level.GOLD, 100, 40);
+        this.user1 = new User("userA", "유저A", "passwordA", "emailA", Level.BASIC, 1, 0);
+        this.user2 = new User("userB", "유저B", "passwordB", "emailB", Level.SILVER, 55, 10);
+        this.user3 = new User("userC", "유저C", "passwordC", "emailC", Level.GOLD, 100, 40);
 
         userDao.deleteAll();
     }

@@ -4,6 +4,7 @@ import com.example.chapter5.v3.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy;
 import com.example.chapter5.v3.upgradeLevelPolicy.UserLevelUpgradePolicy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -12,6 +13,7 @@ import javax.sql.DataSource;
 
 
 @Configuration
+@PropertySource({ "classpath:chapter5/application.yml" })
 public class DaoFactory {
 
     @Bean
