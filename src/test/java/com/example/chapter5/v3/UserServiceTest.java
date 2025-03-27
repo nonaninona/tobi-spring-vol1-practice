@@ -1,5 +1,6 @@
 package com.example.chapter5.v3;
 
+import com.example.chapter5.v3.mailSender.MockMailSender;
 import com.example.chapter5.v3.upgradeLevelPolicy.UserLevelUpgradePolicy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.mail.MailSender;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
@@ -19,7 +21,7 @@ import static com.example.chapter5.v3.upgradeLevelPolicy.DefaultUserLevelUpgrade
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest(classes = DaoFactory.class)
+@SpringBootTest(classes = TobiConfig.class)
 public class UserServiceTest {
 
     @Autowired
@@ -37,7 +39,7 @@ public class UserServiceTest {
 
     @BeforeEach
     void setup() {
-        ApplicationContext ac = new AnnotationConfigApplicationContext(DaoFactory.class);
+        ApplicationContext ac = new AnnotationConfigApplicationContext(TobiConfig.class);
         userService = ac.getBean("userService", UserService.class);
         userDao = ac.getBean("userDao", UserDao.class);
         userDao.deleteAll();
@@ -51,9 +53,13 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("유저 업그레이드 테스트")
+    @DirtiesContext
     void testUserLevelUpgrade() throws Exception {
         // given
         users.forEach(user -> userDao.add(user));
+
+        MockMailSender mockMailSender = new MockMailSender();
+        userService.setMailSender(mockMailSender);
 
         // when
         userService.upgradeLevels();
@@ -64,6 +70,11 @@ public class UserServiceTest {
         checkLevelUpgraded(users.get(2), false);
         checkLevelUpgraded(users.get(3), true);
         checkLevelUpgraded(users.get(4), false);
+
+        List<String> requests = mockMailSender.getRequests();
+        assertThat(requests.size()).isEqualTo(2);
+        assertThat(requests.get(0)).isEqualTo(users.get(1).getEmail());
+        assertThat(requests.get(1)).isEqualTo(users.get(3).getEmail());
     }
 
     @Test

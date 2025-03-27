@@ -14,7 +14,7 @@ import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = DaoFactory.class)
+@SpringBootTest(classes = TobiConfig.class)
 public class UserDaoTest {
     @Autowired
     private UserDao userDao;

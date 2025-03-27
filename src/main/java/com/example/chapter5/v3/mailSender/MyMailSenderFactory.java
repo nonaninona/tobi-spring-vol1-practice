@@ -1,4 +1,4 @@
-package com.example.chapter5.v3;
+package com.example.chapter5.v3.mailSender;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.MailSender;

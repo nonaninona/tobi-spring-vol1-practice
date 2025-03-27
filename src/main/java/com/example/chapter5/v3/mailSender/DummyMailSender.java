@@ -1,4 +1,4 @@
-package com.example.chapter5.v3;
+package com.example.chapter5.v3.mailSender;
 
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;

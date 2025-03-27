@@ -1,5 +1,8 @@
 package com.example.chapter5.v3;
 
+import com.example.chapter5.v3.mailSender.DummyMailSender;
+import com.example.chapter5.v3.mailSender.EmailProperties;
+import com.example.chapter5.v3.mailSender.MyMailSenderFactory;
 import com.example.chapter5.v3.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy;
 import com.example.chapter5.v3.upgradeLevelPolicy.UserLevelUpgradePolicy;
 import org.springframework.context.annotation.Bean;
@@ -8,8 +11,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.mail.MailSender;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -17,7 +18,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @PropertySource({"classpath:chapter5/application.properties"})
-public class DaoFactory {
+public class TobiConfig {
 
     @Bean
     public UserService userService() {

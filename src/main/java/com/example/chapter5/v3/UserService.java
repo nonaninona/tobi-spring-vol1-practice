@@ -2,26 +2,32 @@ package com.example.chapter5.v3;
 
 import com.example.chapter5.v3.upgradeLevelPolicy.UserLevelUpgradePolicy;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
 public class UserService {
     private final UserDao userDao;
     private final UserLevelUpgradePolicy levelUpgradePolicy;
     private final PlatformTransactionManager platformTransactionManager;
-    private final MailSender mailSender;
+    @Setter
+    private MailSender mailSender;
 
     @Value("${spring.mail.username}")
     private String username;
+
+    public UserService(UserDao userDao, UserLevelUpgradePolicy levelUpgradePolicy, PlatformTransactionManager platformTransactionManager, MailSender mailSender) {
+        this.userDao = userDao;
+        this.levelUpgradePolicy = levelUpgradePolicy;
+        this.platformTransactionManager = platformTransactionManager;
+        this.mailSender = mailSender;
+    }
 
     public void upgradeLevels() {
         TransactionStatus status = platformTransactionManager.getTransaction(new DefaultTransactionDefinition());

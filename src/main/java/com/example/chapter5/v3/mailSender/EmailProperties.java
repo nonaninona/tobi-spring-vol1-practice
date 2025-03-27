@@ -1,4 +1,4 @@
-package com.example.chapter5.v3;
+package com.example.chapter5.v3.mailSender;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
