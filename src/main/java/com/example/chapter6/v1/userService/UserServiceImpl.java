@@ -1,48 +1,38 @@
-package com.example.chapter6.v1;
+package com.example.chapter6.v1.userService;
 
+import com.example.chapter6.v1.Level;
+import com.example.chapter6.v1.User;
+import com.example.chapter6.v1.UserDao;
 import com.example.chapter6.v1.upgradeLevelPolicy.UserLevelUpgradePolicy;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.List;
 
-public class UserService {
+public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     private final UserLevelUpgradePolicy levelUpgradePolicy;
-    private final PlatformTransactionManager platformTransactionManager;
     @Setter
     private MailSender mailSender;
 
     @Value("${spring.mail.username}")
     private String username;
 
-    public UserService(UserDao userDao, UserLevelUpgradePolicy levelUpgradePolicy, PlatformTransactionManager platformTransactionManager, MailSender mailSender) {
+    public UserServiceImpl(UserDao userDao, UserLevelUpgradePolicy levelUpgradePolicy, MailSender mailSender) {
         this.userDao = userDao;
         this.levelUpgradePolicy = levelUpgradePolicy;
-        this.platformTransactionManager = platformTransactionManager;
         this.mailSender = mailSender;
     }
 
     public void upgradeLevels() {
-        TransactionStatus status = platformTransactionManager.getTransaction(new DefaultTransactionDefinition());
+        List<User> allUsers = userDao.getAll();
 
-        try {
-            List<User> allUsers = userDao.getAll();
-
-            for (User user : allUsers) {
-                if (canUpgradeLevel(user)) {
-                    upgradeLevel(user);
-                }
+        for (User user : allUsers) {
+            if (canUpgradeLevel(user)) {
+                upgradeLevel(user);
             }
-            platformTransactionManager.commit(status);
-        } catch (RuntimeException e) {
-            platformTransactionManager.rollback(status);
-            throw e;
         }
     }
 

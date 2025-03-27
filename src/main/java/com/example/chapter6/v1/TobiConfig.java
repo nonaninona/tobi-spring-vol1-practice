@@ -5,6 +5,9 @@ import com.example.chapter6.v1.mailSender.EmailProperties;
 import com.example.chapter6.v1.mailSender.MyMailSenderFactory;
 import com.example.chapter6.v1.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy;
 import com.example.chapter6.v1.upgradeLevelPolicy.UserLevelUpgradePolicy;
+import com.example.chapter6.v1.userService.UserService;
+import com.example.chapter6.v1.userService.UserServiceImpl;
+import com.example.chapter6.v1.userService.UserServiceTx;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -22,13 +25,21 @@ public class TobiConfig {
 
     @Bean
     public UserService userService() {
-        UserService userService = new UserService(
-                userDao(),
-                userLevelUpgradePolicy(),
+        UserService userService = new UserServiceTx(
                 platformTransactionManager(),
-                mailSender()
+                userServiceImpl()
         );
         return userService;
+    }
+
+    @Bean
+    public UserServiceImpl userServiceImpl() {
+        UserServiceImpl userServiceImpl = new UserServiceImpl(
+                userDao(),
+                userLevelUpgradePolicy(),
+                mailSender()
+        );
+        return userServiceImpl;
     }
 
     @Bean

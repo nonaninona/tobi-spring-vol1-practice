@@ -2,6 +2,9 @@ package com.example.chapter6.v1;
 
 import com.example.chapter6.v1.mailSender.MockMailSender;
 import com.example.chapter6.v1.upgradeLevelPolicy.UserLevelUpgradePolicy;
+import com.example.chapter6.v1.userService.UserService;
+import com.example.chapter6.v1.userService.UserServiceImpl;
+import com.example.chapter6.v1.userService.UserServiceTx;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +30,8 @@ public class UserServiceTest {
     @Autowired
     private UserService userService;
     @Autowired
+    private UserServiceImpl userServiceImpl;
+    @Autowired
     private UserDao userDao;
     @Autowired
     private UserLevelUpgradePolicy userLevelUpgradePolicy;
@@ -39,11 +44,7 @@ public class UserServiceTest {
 
     @BeforeEach
     void setup() {
-        ApplicationContext ac = new AnnotationConfigApplicationContext(TobiConfig.class);
-        userService = ac.getBean("userService", UserService.class);
-        userDao = ac.getBean("userDao", UserDao.class);
         userDao.deleteAll();
-
         users.add(new User("userA", "유저A", "passwordA", "emailA@gmail.com", Level.BASIC, MIN_LOGIN_COUNT_FOR_SILVER-1, 0));
         users.add(new User("userB", "유저B", "passwordB", "emailB@gmail.com", Level.BASIC, MIN_LOGIN_COUNT_FOR_SILVER, 0));
         users.add(new User("userC", "유저C", "passwordC", "emailC@gmail.com", Level.SILVER, 60, MIN_RECOMMENED_COUNT_FOR_GOLD-1));
@@ -59,7 +60,7 @@ public class UserServiceTest {
         users.forEach(user -> userDao.add(user));
 
         MockMailSender mockMailSender = new MockMailSender();
-        userService.setMailSender(mockMailSender);
+        userServiceImpl.setMailSender(mockMailSender);
 
         // when
         userService.upgradeLevels();
@@ -118,23 +119,24 @@ public class UserServiceTest {
     void testNetworkFail() {
         // given
         users.forEach(user -> userDao.add(user));
-        UserService testUserService = new TestUserService(userDao, userLevelUpgradePolicy, platformTransactionManager, mailSender, users.get(3).getId());
+        UserServiceImpl testUserService = new TestUserService(userDao, userLevelUpgradePolicy, mailSender, users.get(3).getId());
+        UserService userServiceTx = new UserServiceTx(platformTransactionManager, testUserService);
 
         // when
 
         // then
-        assertThrows(TestUserServiceException.class, () -> testUserService.upgradeLevels());
+        assertThrows(TestUserServiceException.class, () -> userServiceTx.upgradeLevels());
         assertThat(users.get(1).getLevel()).isEqualTo(Level.BASIC);
     }
 
 
 
-    private static class TestUserService extends UserService {
+    private static class TestUserService extends UserServiceImpl {
 
         private String id;
 
-        public TestUserService(UserDao userDao, UserLevelUpgradePolicy levelUpgradePolicy, PlatformTransactionManager platformTransactionManager, MailSender mailSender, String id) {
-            super(userDao, levelUpgradePolicy, platformTransactionManager, mailSender);
+        public TestUserService(UserDao userDao, UserLevelUpgradePolicy levelUpgradePolicy, MailSender mailSender, String id) {
+            super(userDao, levelUpgradePolicy, mailSender);
             this.id = id;
         }
 
