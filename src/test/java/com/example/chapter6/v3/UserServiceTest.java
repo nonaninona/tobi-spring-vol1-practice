@@ -1,11 +1,15 @@
 package com.example.chapter6.v3;
 
+import com.example.chapter6.v3.config.DataSourceConfig;
+import com.example.chapter6.v3.config.MailSenderConfig;
+import com.example.chapter6.v3.config.UserServiceConfig;
 import com.example.chapter6.v3.mailSender.MockMailSender;
 import com.example.chapter6.v3.proxy.TransactionHandler;
 import com.example.chapter6.v3.upgradeLevelPolicy.UserLevelUpgradePolicy;
 import com.example.chapter6.v3.userService.UserService;
+import com.example.chapter6.v3.userService.UserServiceDynamicProxy;
+import com.example.chapter6.v3.userService.UserServiceDynamicProxyImpl;
 import com.example.chapter6.v3.userService.UserServiceImpl;
-import com.example.chapter6.v3.userService.UserServiceTx;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +20,6 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,11 +30,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = TobiConfig.class)
+@SpringBootTest(classes = { UserServiceConfig.class, MailSenderConfig.class, DataSourceConfig.class })
 public class UserServiceTest {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserServiceDynamicProxy userServiceDynamicProxy;
     @Autowired
     private UserDao userDao;
     @Autowired
@@ -170,6 +175,18 @@ public class UserServiceTest {
         assertThat(users.get(1).getLevel()).isEqualTo(Level.BASIC);
     }
 
+
+    @Test
+    @DisplayName("강제 예외 발생")
+    void testNetworkFailWithUserServiceDynamicProxy() {
+        // given
+
+        // when
+
+        // then
+        assertThrows(IllegalArgumentException.class, userServiceDynamicProxy::upgradeLevels);
+        assertThat(users.get(1).getLevel()).isEqualTo(Level.BASIC);
+    }
 
 
     private static class TestUserService extends UserServiceImpl {

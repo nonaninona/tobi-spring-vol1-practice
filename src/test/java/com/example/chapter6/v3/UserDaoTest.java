@@ -1,5 +1,8 @@
 package com.example.chapter6.v3;
 
+import com.example.chapter6.v3.config.DataSourceConfig;
+import com.example.chapter6.v3.config.MailSenderConfig;
+import com.example.chapter6.v3.config.UserServiceConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +17,7 @@ import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = TobiConfig.class)
+@SpringBootTest(classes = { UserServiceConfig.class, MailSenderConfig.class, DataSourceConfig.class })
 public class UserDaoTest {
     @Autowired
     private UserDao userDao;
