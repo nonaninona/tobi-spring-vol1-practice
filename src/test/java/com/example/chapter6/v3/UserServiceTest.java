@@ -1,6 +1,7 @@
 package com.example.chapter6.v3;
 
 import com.example.chapter6.v3.mailSender.MockMailSender;
+import com.example.chapter6.v3.proxy.TransactionHandler;
 import com.example.chapter6.v3.upgradeLevelPolicy.UserLevelUpgradePolicy;
 import com.example.chapter6.v3.userService.UserService;
 import com.example.chapter6.v3.userService.UserServiceImpl;
@@ -15,6 +16,8 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -149,14 +152,21 @@ public class UserServiceTest {
     @DisplayName("강제 예외 발생")
     void testNetworkFail() {
         // given
-        users.forEach(user -> userDao.add(user));
+        users.forEach(u -> userDao.add(u));
         UserServiceImpl testUserService = new TestUserService(userDao, userLevelUpgradePolicy, mailSender, users.get(3).getId());
-        UserService userServiceTx = new UserServiceTx(platformTransactionManager, testUserService);
+
+        TransactionHandler txHandler = new TransactionHandler(testUserService, platformTransactionManager, "upgradeLevels");
+
+        UserService userTxService = (UserService) Proxy.newProxyInstance(
+                getClass().getClassLoader(),
+                new Class[]{UserService.class},
+                txHandler
+        );
 
         // when
 
         // then
-        assertThrows(TestUserServiceException.class, () -> userServiceTx.upgradeLevels());
+        assertThrows(TestUserServiceException.class, userTxService::upgradeLevels);
         assertThat(users.get(1).getLevel()).isEqualTo(Level.BASIC);
     }
 
