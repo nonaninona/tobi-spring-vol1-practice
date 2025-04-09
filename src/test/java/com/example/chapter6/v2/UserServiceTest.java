@@ -8,9 +8,11 @@ import com.example.chapter6.v2.userService.UserServiceTx;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -21,14 +23,13 @@ import static com.example.chapter6.v2.upgradeLevelPolicy.DefaultUserLevelUpgrade
 import static com.example.chapter6.v2.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy.MIN_RECOMMENED_COUNT_FOR_GOLD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = TobiConfig.class)
 public class UserServiceTest {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserServiceImpl userServiceImpl;
     @Autowired
     private UserDao userDao;
     @Autowired
@@ -52,23 +53,22 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("유저 업그레이드 테스트")
-    @DirtiesContext
-    void testUserLevelUpgrade() throws Exception {
+    void testUserLevelUpgrade() {
         // given
-        users.forEach(user -> userDao.add(user));
-
+        MockUserDao mockUserDao = new MockUserDao(users);
         MockMailSender mockMailSender = new MockMailSender();
-        userServiceImpl.setMailSender(mockMailSender);
+
+        //진짜 고립된 테스트이려면 userLevelUpgradePolicy도 mock 객체 만들어야 함
+        UserServiceImpl userServiceImpl = new UserServiceImpl(mockUserDao, userLevelUpgradePolicy, mockMailSender);
 
         // when
-        userService.upgradeLevels();
+        userServiceImpl.upgradeLevels();
 
         // then
-        checkLevelUpgraded(users.get(0), false);
-        checkLevelUpgraded(users.get(1), true);
-        checkLevelUpgraded(users.get(2), false);
-        checkLevelUpgraded(users.get(3), true);
-        checkLevelUpgraded(users.get(4), false);
+        List<User> updated = mockUserDao.getUpdated();
+        assertThat(updated.size()).isEqualTo(2);
+        checkUserAndLevel(updated.get(0), "유저B", Level.SILVER);
+        checkUserAndLevel(updated.get(1), "유저D", Level.GOLD);
 
         List<String> requests = mockMailSender.getRequests();
         assertThat(requests.size()).isEqualTo(2);
@@ -151,5 +151,42 @@ public class UserServiceTest {
     private static class TestUserServiceException extends RuntimeException {
         public TestUserServiceException() {
         }
+    }
+
+    private static class MockUserDao implements UserDao {
+        private List<User> users;
+        private List<User> updated = new ArrayList<>();
+
+        public MockUserDao(List<User> users) {
+            this.users = users;
+        }
+
+        public List<User> getUsers() {
+            return users;
+        }
+
+        public List<User> getUpdated() {
+            return updated;
+        }
+
+        @Override
+        public int update(User user) {
+            updated.add(user);
+            return 1;
+        }
+
+        @Override
+        public List<User> getAll() {
+            return users;
+        }
+
+        @Override
+        public void add(User user) {throw new UnsupportedOperationException();}
+        @Override
+        public User get(String id) {throw new UnsupportedOperationException();}
+        @Override
+        public void deleteAll() {throw new UnsupportedOperationException();}
+        @Override
+        public int getCount() {throw new UnsupportedOperationException();}
     }
 }
