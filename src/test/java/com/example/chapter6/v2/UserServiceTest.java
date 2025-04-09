@@ -77,6 +77,40 @@ public class UserServiceTest {
     }
 
     @Test
+    @DisplayName("유저 업그레이드 테스트 - 목 프레임워크 사용")
+    void testUserLevelUpgradeWithMockito() {
+        // given
+        UserDao mockUserDao = mock(UserDao.class);
+        when(mockUserDao.getAll()).thenReturn(users);
+
+        MailSender mockMailSender = mock(MailSender.class);
+        UserServiceImpl userServiceImpl = new UserServiceImpl(mockUserDao, userLevelUpgradePolicy, mockMailSender);
+
+        // when
+        userServiceImpl.upgradeLevels();
+
+        // then
+        verify(mockUserDao, times(2)).update(any(User.class));
+
+        verify(mockUserDao).update(users.get(1));
+        assertThat(users.get(1).getLevel()).isEqualTo(Level.SILVER);
+
+        verify(mockUserDao).update(users.get(3));
+        assertThat(users.get(3).getLevel()).isEqualTo(Level.GOLD);
+
+        ArgumentCaptor<SimpleMailMessage> mailMessageArgs = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(mockMailSender, times(2)).send(mailMessageArgs.capture());
+        List<SimpleMailMessage> allValues = mailMessageArgs.getAllValues();
+        assertThat(allValues.get(0).getTo()[0]).isEqualTo(users.get(1).getEmail());
+        assertThat(allValues.get(1).getTo()[0]).isEqualTo(users.get(3).getEmail());
+    }
+
+    private void checkUserAndLevel(User user, String name, Level level) {
+        assertThat(user.getName()).isEqualTo(name);
+        assertThat(user.getLevel()).isEqualTo(level);
+    }
+
+    @Test
     @DisplayName("사용자 가입 시 BASIC 레벨 부여")
     void testInitialBasic() {
         // given
