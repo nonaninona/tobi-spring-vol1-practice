@@ -1,8 +1,5 @@
 package com.example.chapter6.v4;
 
-import com.example.chapter6.v4.Level;
-import com.example.chapter6.v4.User;
-import com.example.chapter6.v4.UserDao;
 import com.example.chapter6.v4.config.DataSourceConfig;
 import com.example.chapter6.v4.config.MailSenderConfig;
 import com.example.chapter6.v4.config.UserServiceConfig;
@@ -16,8 +13,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -36,9 +35,9 @@ import static org.mockito.Mockito.*;
 public class UserServiceTest {
 
     @Autowired
-    private UserService userService;
+    private ApplicationContext context;
     @Autowired
-    private UserServiceDynamicProxy userServiceDynamicProxy;
+    private UserService userService;
     @Autowired
     private UserDao userDao;
     @Autowired
@@ -156,7 +155,7 @@ public class UserServiceTest {
 
 
     @Test
-    @DisplayName("강제 예외 발생")
+    @DisplayName("강제 예외 발생 - 트랜잭션 핸들러")
     void testNetworkFail() {
         // given
         users.forEach(u -> userDao.add(u));
@@ -179,14 +178,20 @@ public class UserServiceTest {
 
 
     @Test
-    @DisplayName("강제 예외 발생")
+    @DisplayName("강제 예외 발생 - JDK 다이나믹 프록시 => advisor")
     void testNetworkFailWithUserServiceDynamicProxy() {
         // given
+        users.forEach(u -> userDao.add(u));
+        UserServiceImpl testUserService = new TestUserService(userDao, userLevelUpgradePolicy, mailSender, users.get(3).getId());
+
+        ProxyFactoryBean proxyFactoryBean = (ProxyFactoryBean) context.getBean("&userService");
+        proxyFactoryBean.setTarget(testUserService);
+        UserService userServiceWithAdvisor = (UserService) proxyFactoryBean.getObject();
 
         // when
 
         // then
-        assertThrows(IllegalArgumentException.class, userServiceDynamicProxy::upgradeLevels);
+        assertThrows(TestUserServiceException.class, userServiceWithAdvisor::upgradeLevels);
         assertThat(users.get(1).getLevel()).isEqualTo(Level.BASIC);
     }
 

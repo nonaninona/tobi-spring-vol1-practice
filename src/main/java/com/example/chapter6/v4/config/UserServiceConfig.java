@@ -1,11 +1,14 @@
 package com.example.chapter6.v4.config;
 
 import com.example.chapter6.v4.UserDao;
-import com.example.chapter6.v4.proxy.TransactionHandler;
+import com.example.chapter6.v4.proxy.TransactionAdvice;
 import com.example.chapter6.v4.upgradeLevelPolicy.DefaultUserLevelUpgradePolicy;
 import com.example.chapter6.v4.upgradeLevelPolicy.UserLevelUpgradePolicy;
 import com.example.chapter6.v4.userService.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -13,7 +16,6 @@ import org.springframework.mail.MailSender;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.lang.reflect.Proxy;
 
 
 @Configuration
@@ -23,26 +25,32 @@ public class UserServiceConfig {
     private final MailSender mailSender;
     private final UserDao userDao;
 
+
     @Bean
-    public UserServiceDynamicProxy userServiceDynamicProxy(PlatformTransactionManager platformTransactionManager) {
-        UserServiceDynamicProxy userServiceProxy = (UserServiceDynamicProxy) Proxy.newProxyInstance(
-                getClass().getClassLoader(),
-                new Class[]{UserServiceDynamicProxy.class},
-                new TransactionHandler(userServiceImpl(), platformTransactionManager, "upgradeUserLevels")
-        );
-        return userServiceProxy;
+    public TransactionAdvice transactionAdvice() {
+        TransactionAdvice transactionAdvice = new TransactionAdvice(platformTransactionManager());
+        return transactionAdvice;
     }
 
     @Bean
-    public UserServiceDynamicProxyImpl userServiceDynamicProxyImpl() {
-        UserServiceDynamicProxyImpl userServiceDynamicProxyImpl = new UserServiceDynamicProxyImpl(userDao, userLevelUpgradePolicy(), mailSender);
-        return userServiceDynamicProxyImpl;
+    public NameMatchMethodPointcut transactionPointcut() {
+        NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+        pointcut.addMethodName("upgrade*");
+        return pointcut;
     }
 
     @Bean
-    public UserService userService() {
-        UserService userService = new UserServiceTx(platformTransactionManager(), userServiceImpl());
-        return userService;
+    public DefaultPointcutAdvisor transactionAdvisor() {
+        return new DefaultPointcutAdvisor(transactionPointcut(), transactionAdvice());
+    }
+
+    @Bean
+    public ProxyFactoryBean userService() {
+        ProxyFactoryBean proxyFactoryBean = new ProxyFactoryBean();
+        proxyFactoryBean.setTarget(userServiceImpl());
+        proxyFactoryBean.addAdvisor(transactionAdvisor());
+
+        return proxyFactoryBean;
     }
 
     @Bean
